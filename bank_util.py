@@ -1,6 +1,8 @@
 import os
-import pandas as pd
 import time
+import datetime
+from dateutil.relativedelta import relativedelta
+import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
@@ -19,15 +21,16 @@ DATA_ROOT_DIR_PATH = parent2_path + '/cashflow_mng_root_dir/'
 
 
 # =============================================================================
-# common
+# common functions
 # =============================================================================
 
+# TODO: implement
 def download_all_bank_statement(period):
     """
     download all bank statement (of all user and all bank) in specified period
 
-    :param  period: int, period that we want to get bank statement data from now
-    :return none
+    :param  period: int, period that we want to get bank statement data (past ~ now)
+    :return None
     """
     # get all user data
     user_filepath = DATA_ROOT_DIR_PATH + 'registration/user_list.csv'
@@ -42,7 +45,10 @@ def download_all_bank_statement(period):
         for bank in bank_list:
             # check if user data exists in the bank
             if (exists_bank_account(user, bank)):
-                # download csv data
+                # TODO: make directories to save bank statement
+                pass
+
+                # TODO: download csv data
 
 
 def exists_bank_account(user, bank):
@@ -51,17 +57,73 @@ def exists_bank_account(user, bank):
 
     :param  user: str, user name 
     :param  bank: str, bank name
-    :return none: bool, existence of bank account
+    :return     : bool, existence of bank account
     """
     path = DATA_ROOT_DIR_PATH + 'bank_user_data/' + bank + '/user_' + user + '/user_data.csv'
     return os.path.exists(path)
 
 
+def make_dir_to_save_bank_statement(user, bank, period):
+    """
+    make directories to save bank statement
+    if a directory has already existed, making directory is passed
+
+    :param  user  : str, user name
+    :param  bank  : str, user name
+    :param  period: int, period that we want to get bank statement data (past ~ now)
+    :return None
+    """
+    # get last month date
+    target_date = datetime.datetime.today() - relativedelta(months=1)
+
+    # make directories for specified period
+    for i in range(period):
+        # get year and month
+        target_year = target_date.year
+        target_month = target_date.month
+
+        # make directory
+        year_dir_path = (DATA_ROOT_DIR_PATH
+                         + 'bank_statement/' + bank + '/user_' + user
+                         + '/' + str(target_year))
+        month_dir_path = (DATA_ROOT_DIR_PATH
+                          + 'bank_statement/' + bank + '/user_' + user 
+                          + '/' + str(target_year)
+                          + '/' + str(target_month))
+        if (not os.path.isdir(year_dir_path)):
+            os.makedirs(year_dir_path)
+            print('make directory: ' + year_dir_path)
+
+        if (not os.path.isdir(month_dir_path)):
+            os.makedirs(month_dir_path)
+            print('make directory:' + month_dir_path)
+
+        # move to last month
+        target_date -= relativedelta(months=1)
+
+# TODO: implement
+def download_user_bank_statement(user, bank, period):
+    """
+    download user's bank statement for bank
+    API or HP are different depending on a bank,
+    so download functions is prepared for each bank
+
+    :param  user  : str, user name
+    :param  bank  : str, bank name
+    :param  period: int, period that we want to get bank statement data (past ~ now)
+    :return None
+    """
+    # TODO: smbc: download user bank statement
+    if (bank == 'smbc'):
+        download_user_bank_statement_smbc(user, period)
+
+
 # =============================================================================
-# smbc
+# smbc functions
 # =============================================================================
 
-def donwload_user_bank_statement_smbc(user, period):
+# TODO: implement
+def download_user_bank_statement_smbc(user, period):
     """
     download smbc csv in specified priod
     1. login to bank HP and move to the page to download csv
@@ -70,12 +132,27 @@ def donwload_user_bank_statement_smbc(user, period):
 
     :param  user  : str, user name
     :param  period: int, target period for downloading
+    :return None
     """
+    # TODO: login to HP and move to a page to dowonload csv
+
+    # TODO: set period to download csv
+
+    # TODO: download csv
     pass
 
+# TODO: implement
 def download_csv_simple_smbc():
+    """
+    download csv simply in the downloding page
+
+    :param  dest_to_save_csv: str, destination to save csv
+    :return None
+    """
+    # TODO: download csv simply in csv downloading page
     pass
 
+# TODO: merge to "download_csv_simple_smbc()"
 def csv_download_smbc():
     # =========================================================================
     # load account infromation
@@ -143,6 +220,7 @@ def csv_download_smbc():
     csv_donwload_button.click()
     time.sleep(WAIT_TIME_LONG)
 
-
+# for test
 if __name__ == '__main__':
-    download_all_bank_statement(1)
+    # download_all_bank_statement(1)
+    # make_dir_to_save_bank_statement('hoge', 'hoge', 24)
