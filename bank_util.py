@@ -24,7 +24,6 @@ DATA_ROOT_DIR_PATH = parent2_path + '/cashflow_mng_root_dir/'
 # common functions
 # =============================================================================
 
-# TODO: implement
 def download_all_bank_statement(period):
     """
     download all bank statement (of all user and all bank) in specified period
@@ -45,10 +44,12 @@ def download_all_bank_statement(period):
         for bank in bank_list:
             # check if user data exists in the bank
             if (exists_bank_account(user, bank)):
-                # TODO: make directories to save bank statement
-                pass
 
-                # TODO: download csv data
+                # make directories to save bank statement
+                make_dir_to_save_bank_statement(user, bank, period)
+
+                # download csv data
+                download_user_bank_statement(user, bank, period)
 
 
 def exists_bank_account(user, bank):
@@ -100,6 +101,7 @@ def make_dir_to_save_bank_statement(user, bank, period):
 
         # move to last month
         target_date -= relativedelta(months=1)
+
 
 # TODO: implement
 def download_user_bank_statement(user, bank, period):
@@ -222,5 +224,5 @@ def csv_download_smbc():
 
 # for test
 if __name__ == '__main__':
-    # download_all_bank_statement(1)
+    download_all_bank_statement(24)
     # make_dir_to_save_bank_statement('hoge', 'hoge', 24)
