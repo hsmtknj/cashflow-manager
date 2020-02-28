@@ -6,7 +6,7 @@ import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
-# find curretn and parent path
+# find current and parent path
 def parent_path(path=__file__, f=0):
     return str('/'.join(os.path.abspath(path).split('/')[0:-1-f]))
 
@@ -48,6 +48,7 @@ def download_all_bank_statement(period):
                 # make directories to save bank statement
                 make_dir_to_save_bank_statement(user, bank, period)
 
+                # TODO: implement
                 # download csv data
                 download_user_bank_statement(user, bank, period)
 
@@ -117,7 +118,7 @@ def download_user_bank_statement(user, bank, period):
     """
     # TODO: smbc: download user bank statement
     if (bank == 'smbc'):
-        download_user_bank_statement_smbc(user, period)
+        download_user_bank_statement_smbc(user, bank, period)
 
 
 # =============================================================================
@@ -125,7 +126,7 @@ def download_user_bank_statement(user, bank, period):
 # =============================================================================
 
 # TODO: implement
-def download_user_bank_statement_smbc(user, period):
+def download_user_bank_statement_smbc(user, bank, period):
     """
     download smbc csv in specified priod
     1. login to bank HP and move to the page to download csv
@@ -133,15 +134,65 @@ def download_user_bank_statement_smbc(user, period):
     3. download csv
 
     :param  user  : str, user name
+    :param  bank  : str, bank name
     :param  period: int, target period for downloading
     :return None
     """
+    # =========================================================================
     # TODO: login to HP and move to a page to dowonload csv
+    # =========================================================================
 
+    # get account information
+    bank_account_filepath = DATA_ROOT_DIR_PATH + 'bank_user_data/' + bank + '/user_' + user + '/user_data.csv'
+    bank_account_df = pd.read_csv(bank_account_filepath)
+    branch_num = bank_account_df['branch_num'][0]
+    account_num = bank_account_df['account_num'][0]
+    password = bank_account_df['password'][0]
+
+    # set bank url
+    bank_url = 'https://direct.smbc.co.jp/aib/aibgsjsw5001.jsp'
+    
+    # open chrome with secret mode
+    option = Options()
+    option.add_argument('--incognito')
+    driver = webdriver.Chrome(options=option)
+    driver.get(bank_url)
+    time.sleep(WAIT_TIME_LONG)
+
+    # enter account information and login
+    branch_box = driver.find_element_by_id('S_BRANCH_CD')
+    branch_box.send_keys(str(branch_num))
+
+    account_box = driver.find_element_by_id('S_ACCNT_NO')
+    account_box.send_keys(str(account_num))
+
+    password_box = driver.find_element_by_xpath('//*[@id="PASSWORD"]')
+    password_box.send_keys(str(password).zfill(4))
+
+    login_button = driver.find_element_by_xpath('//*[@id="login"]/input[7]')
+    login_button.click()
+    time.sleep(WAIT_TIME_LONG)
+
+    # push next button
+    next_button = driver.find_element_by_xpath('//*[@id="mainCont"]/div/div[3]/ul/li/input')
+    next_button.click()
+    time.sleep(WAIT_TIME_LONG)
+
+    # go to page of account activity statement
+    account_activity_statement_button = driver.find_element_by_xpath('//*[@id="cmn02main"]/div[2]/form/div/div/div[2]/div[2]/table/tbody/tr/td[2]/p[1]/a')
+    account_activity_statement_button.click()
+    time.sleep(WAIT_TIME_LONG)    
+
+    time.sleep(100)
+
+    # =========================================================================
     # TODO: set period to download csv
+    # =========================================================================
 
+    # =========================================================================
     # TODO: download csv
-    pass
+    # =========================================================================
+
 
 # TODO: implement
 def download_csv_simple_smbc():
@@ -152,12 +203,12 @@ def download_csv_simple_smbc():
     :return None
     """
     # TODO: download csv simply in csv downloading page
-    pass
+
 
 # TODO: merge to "download_csv_simple_smbc()"
 def csv_download_smbc():
     # =========================================================================
-    # load account infromation
+    # load account information
     # =========================================================================
 
     # load csv file and get information
