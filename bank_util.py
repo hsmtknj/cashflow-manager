@@ -2,6 +2,7 @@ import os
 import time
 import datetime
 import calendar
+import shutil
 import pandas as pd
 from dateutil.relativedelta import relativedelta
 from selenium import webdriver
@@ -50,7 +51,6 @@ def download_all_bank_statement(period):
                 # make directories to save bank statement
                 make_dir_to_save_bank_statement(user, bank, period)
 
-                # TODO: implement
                 # download csv data
                 download_user_bank_statement(user, bank, period)
 
@@ -105,6 +105,7 @@ def make_dir_to_save_bank_statement(user, bank, period):
         # move to last month
         target_date -= relativedelta(months=1)
 
+
 def download_user_bank_statement(user, bank, period):
     """
     download user's bank statement for bank
@@ -135,7 +136,6 @@ def get_last_date(year, month):
 # smbc functions
 # =============================================================================
 
-# TODO: implement
 def download_user_bank_statement_smbc(user, bank, period):
     """
     download smbc csv in specified priod
@@ -159,15 +159,19 @@ def download_user_bank_statement_smbc(user, bank, period):
         month = target_date.month
         set_period_to_download_csv(driver, year, month)
 
-        # TODO: download csv
+        # download csv file of bank statement
+        filepath_to_save_csv = (DATA_ROOT_DIR_PATH
+                                + 'bank_statement/' + bank + '/user_' + user + '/'
+                                + str(year) + '/' 
+                                + str(month)) + '/'
+        if (not os.path.isfile(filepath_to_save_csv + 'meisai.csv')):
+            download_csv_simple_smbc(driver, filepath_to_save_csv)
+            print('download: ' + filepath_to_save_csv + 'meisai.csv')
+        else:
+            print('exist   : ' + filepath_to_save_csv + 'meisai.csv')
 
         # move to last month
         target_date -= relativedelta(months=1)
-
-    # =========================================================================
-    # TODO: download csv
-    # =========================================================================
-    time.sleep(100)
 
 
 def move_to_page_to_download_csv_smbc(user, bank, period):
@@ -232,7 +236,6 @@ def set_period_to_download_csv(driver, year, month):
     :param  month : int, month you want to set
     :return None
     """
-
     # set period of downloding target
     from_year_num = year
     from_month_num = month
@@ -273,86 +276,29 @@ def set_period_to_download_csv(driver, year, month):
     inquiry_button.click()
 
 
-# TODO: implement
-def download_csv_simple_smbc():
+def download_csv_simple_smbc(driver, filepath_to_save_csv):
     """
     download csv simply in the downloding page
 
-    :param  dest_to_save_csv: str, destination to save csv
+    :param  driver              : webdriver, 
+    :param  filepath_to_save_csv: str, destination to save csv
     :return None
     """
-    # TODO: download csv simply in csv downloading page    
-
-
-# TODO: merge to "download_csv_simple_smbc()"
-def csv_download_smbc():
-    # =========================================================================
-    # load account information
-    # =========================================================================
-
-    # load csv file and get information
-    file_path = parent2_path + '/data/bank_account/smbc.csv'
-    account_df = pd.read_csv(file_path)
-
-    branch_num = account_df['branch_num'][0]
-    account_num = account_df['account_num'][0]
-    password = account_df['password'][0]
-
-
-    # =========================================================================
-    # download csv file
-    # =========================================================================
-
-    # -------------------------------------------------------------------------
-    # login
-    # -------------------------------------------------------------------------
-
-    # set smbc url
-    bank_url = 'https://direct.smbc.co.jp/aib/aibgsjsw5001.jsp'
-    save_file_path = './meisai.csv'
-
-    # open chrome with secret mode
-    option = Options()
-    option.add_argument('--incognito')
-    driver = webdriver.Chrome(options=option)
-    driver.get(bank_url)
-    time.sleep(WAIT_TIME_LONG)
-
-    # enter account information
-    branch_box = driver.find_element_by_id('S_BRANCH_CD')
-    branch_box.send_keys(str(branch_num))
-
-    account_box = driver.find_element_by_id('S_ACCNT_NO')
-    account_box.send_keys(str(account_num))
-
-    password_box = driver.find_element_by_xpath('//*[@id="PASSWORD"]')
-    password_box.send_keys(str(password).zfill(4))
-
-    login_button = driver.find_element_by_xpath('//*[@id="login"]/input[7]')
-    login_button.click()
-    time.sleep(WAIT_TIME_LONG)
-
-
-    # -------------------------------------------------------------------------
-    # after login
-    # -------------------------------------------------------------------------
-
-    # push next button
-    next_button = driver.find_element_by_xpath('//*[@id="mainCont"]/div/div[3]/ul/li/input')
-    next_button.click()
-    time.sleep(WAIT_TIME_LONG)
-
-    # go to page of account activity statement
-    account_activity_statement_button = driver.find_element_by_xpath('//*[@id="cmn02main"]/div[2]/form/div/div/div[2]/div[2]/table/tbody/tr/td[2]/p[1]/a')
-    account_activity_statement_button.click()
-    time.sleep(WAIT_TIME_LONG)
-
-    # download csv file
+    # HACK: want to save csv file directory
+    # download csv simply in csv downloading page
     csv_donwload_button = driver.find_element_by_id('DownloadCSV')
     csv_donwload_button.click()
     time.sleep(WAIT_TIME_LONG)
 
-# for test
+    # move csf file
+    filepath_download_dir = os.environ['HOME'] + '/Downloads/meisai.csv'
+    dest_path = shutil.move(filepath_download_dir, filepath_to_save_csv)
+
+
 if __name__ == '__main__':
-    download_all_bank_statement(1)
+    # (1) make directories
     # make_dir_to_save_bank_statement('hoge', 'hoge', 24)
+
+    # (2) download bank statement
+    download_all_bank_statement(2)
+    
