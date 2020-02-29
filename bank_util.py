@@ -1,6 +1,7 @@
 import os
 import time
 import datetime
+import calendar
 import pandas as pd
 from dateutil.relativedelta import relativedelta
 from selenium import webdriver
@@ -104,7 +105,6 @@ def make_dir_to_save_bank_statement(user, bank, period):
         # move to last month
         target_date -= relativedelta(months=1)
 
-
 def download_user_bank_statement(user, bank, period):
     """
     download user's bank statement for bank
@@ -120,6 +120,16 @@ def download_user_bank_statement(user, bank, period):
     if (bank == 'smbc'):
         download_user_bank_statement_smbc(user, bank, period)
 
+
+def get_last_date(year, month):
+    """
+    get last date of specified year and month
+
+    :param  year : year that you want to get last date
+    :param  month: month that you want to get last date
+    :return None :
+    """
+    return calendar.monthrange(year, month)[0]
 
 # =============================================================================
 # smbc functions
@@ -142,7 +152,9 @@ def download_user_bank_statement_smbc(user, bank, period):
     driver = move_to_page_to_download_csv_smbc(user, bank, period)
 
     # TODO: set period to download csv
-    set_period_to_download_csv(driver)
+    year = 2018
+    month = 5
+    set_period_to_download_csv(driver, year, month)
 
     # =========================================================================
     # TODO: download csv
@@ -204,21 +216,23 @@ def move_to_page_to_download_csv_smbc(user, bank, period):
 
 
 # TODO: implement
-def set_period_to_download_csv(driver):
+def set_period_to_download_csv(driver, year, month):
     """
     set period to download csv
 
-    :param  user  : webdriver, webdriver of a smbc site
+    :param  driver: webdriver, webdriver of a smbc site
+    :param  year  : int, year you want to set
+    :param  month : int, month you want to set
     :return None
     """
 
-    from_year_num = 2018
-    from_month_num = 5
-    from_date_num = 2
+    from_year_num = year
+    from_month_num = month
+    from_date_num = 1
 
-    to_year_num = 2019
-    to_month_num = 7
-    to_date_num = 28
+    to_year_num = year
+    to_month_num = month
+    to_date_num = 28  # TODO: get date
 
     # set "from"
     from_year = driver.find_element_by_name('FromYear')
