@@ -1,10 +1,11 @@
 import os
 import time
 import datetime
-from dateutil.relativedelta import relativedelta
 import pandas as pd
+from dateutil.relativedelta import relativedelta
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import Select
 
 # find current and parent path
 def parent_path(path=__file__, f=0):
@@ -104,7 +105,6 @@ def make_dir_to_save_bank_statement(user, bank, period):
         target_date -= relativedelta(months=1)
 
 
-# TODO: implement
 def download_user_bank_statement(user, bank, period):
     """
     download user's bank statement for bank
@@ -116,7 +116,7 @@ def download_user_bank_statement(user, bank, period):
     :param  period: int, period that we want to get bank statement data (past ~ now)
     :return None
     """
-    # TODO: smbc: download user bank statement
+    # smbc: download user bank statement
     if (bank == 'smbc'):
         download_user_bank_statement_smbc(user, bank, period)
 
@@ -138,10 +138,27 @@ def download_user_bank_statement_smbc(user, bank, period):
     :param  period: int, target period for downloading
     :return None
     """
-    # =========================================================================
-    # TODO: login to HP and move to a page to dowonload csv
-    # =========================================================================
+    # login to HP and move to a page to dowonload csv
+    driver = move_to_page_to_download_csv_smbc(user, bank, period)
 
+    # TODO: set period to download csv
+    set_period_to_download_csv(driver)
+
+    # =========================================================================
+    # TODO: download csv
+    # =========================================================================
+    time.sleep(100)
+
+
+def move_to_page_to_download_csv_smbc(user, bank, period):
+    """
+    move to a page to download csv of bank statement
+
+    :param  user  : str, user name
+    :param  bank  : str, bank name
+    :param  period: int, target period for downloading
+    :return webdriver
+    """
     # get account information
     bank_account_filepath = DATA_ROOT_DIR_PATH + 'bank_user_data/' + bank + '/user_' + user + '/user_data.csv'
     bank_account_df = pd.read_csv(bank_account_filepath)
@@ -181,17 +198,53 @@ def download_user_bank_statement_smbc(user, bank, period):
     # go to page of account activity statement
     account_activity_statement_button = driver.find_element_by_xpath('//*[@id="cmn02main"]/div[2]/form/div/div/div[2]/div[2]/table/tbody/tr/td[2]/p[1]/a')
     account_activity_statement_button.click()
-    time.sleep(WAIT_TIME_LONG)    
+    time.sleep(WAIT_TIME_LONG)
 
-    time.sleep(100)
+    return driver
 
-    # =========================================================================
-    # TODO: set period to download csv
-    # =========================================================================
 
-    # =========================================================================
-    # TODO: download csv
-    # =========================================================================
+# TODO: implement
+def set_period_to_download_csv(driver):
+    """
+    set period to download csv
+
+    :param  user  : webdriver, webdriver of a smbc site
+    :return None
+    """
+
+    from_year_num = 2018
+    from_month_num = 5
+    from_date_num = 2
+
+    to_year_num = 2019
+    to_month_num = 7
+    to_date_num = 28
+
+    # set "from"
+    from_year = driver.find_element_by_name('FromYear')
+    from_year_select = Select(from_year)
+    from_year_select.select_by_value(str(from_year_num))
+
+    from_month = driver.find_element_by_name('FromMonth')
+    from_month_select = Select(from_month)
+    from_month_select.select_by_value('{0:02d}'.format(from_month_num))
+
+    from_date = driver.find_element_by_name('FromDate')
+    from_date_select = Select(from_date)
+    from_date_select.select_by_value('{0:02d}'.format(from_date_num))
+
+    # set "to"
+    to_year = driver.find_element_by_name('ToYear')
+    to_year_select = Select(to_year)
+    to_year_select.select_by_value(str(to_year_num))
+
+    to_month = driver.find_element_by_name('ToMonth')
+    to_month_select = Select(to_month)
+    to_month_select.select_by_value('{0:02d}'.format(to_month_num))
+
+    to_date = driver.find_element_by_name('ToDate')
+    to_date_select = Select(to_date)
+    to_date_select.select_by_value('{0:02d}'.format(to_date_num))
 
 
 # TODO: implement
@@ -202,7 +255,7 @@ def download_csv_simple_smbc():
     :param  dest_to_save_csv: str, destination to save csv
     :return None
     """
-    # TODO: download csv simply in csv downloading page
+    # TODO: download csv simply in csv downloading page    
 
 
 # TODO: merge to "download_csv_simple_smbc()"
