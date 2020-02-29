@@ -151,10 +151,18 @@ def download_user_bank_statement_smbc(user, bank, period):
     # login to HP and move to a page to dowonload csv
     driver = move_to_page_to_download_csv_smbc(user, bank, period)
 
-    # TODO: set period to download csv
-    year = 2018
-    month = 5
-    set_period_to_download_csv(driver, year, month)
+    # download csv for period
+    target_date = datetime.datetime.today() - relativedelta(months=1)
+    for i in range(period):
+        # set year and month
+        year = target_date.year
+        month = target_date.month
+        set_period_to_download_csv(driver, year, month)
+
+        # TODO: download csv
+
+        # move to last month
+        target_date -= relativedelta(months=1)
 
     # =========================================================================
     # TODO: download csv
@@ -260,6 +268,10 @@ def set_period_to_download_csv(driver, year, month):
     to_date_select = Select(to_date)
     to_date_select.select_by_value('{0:02d}'.format(to_date_num))
 
+    # click inquiry button
+    inquiry_button = driver.find_element_by_name('web_kikan')
+    inquiry_button.click()
+
 
 # TODO: implement
 def download_csv_simple_smbc():
@@ -342,5 +354,5 @@ def csv_download_smbc():
 
 # for test
 if __name__ == '__main__':
-    download_all_bank_statement(24)
+    download_all_bank_statement(1)
     # make_dir_to_save_bank_statement('hoge', 'hoge', 24)
