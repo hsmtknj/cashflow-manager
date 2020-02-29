@@ -290,7 +290,7 @@ def download_csv_simple_smbc(driver, filepath_to_save_csv):
     csv_donwload_button.click()
     time.sleep(WAIT_TIME_LONG)
 
-    # move csf file
+    # move csv file
     filepath_download_dir = os.environ['HOME'] + '/Downloads/meisai.csv'
     dest_path = shutil.move(filepath_download_dir, filepath_to_save_csv)
 
