@@ -215,7 +215,6 @@ def move_to_page_to_download_csv_smbc(user, bank, period):
     return driver
 
 
-# TODO: implement
 def set_period_to_download_csv(driver, year, month):
     """
     set period to download csv
@@ -226,6 +225,7 @@ def set_period_to_download_csv(driver, year, month):
     :return None
     """
 
+    # set period of downloding target
     from_year_num = year
     from_month_num = month
     from_date_num = 1
