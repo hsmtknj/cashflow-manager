@@ -129,7 +129,7 @@ def get_last_date(year, month):
     :param  month: month that you want to get last date
     :return None :
     """
-    return calendar.monthrange(year, month)[0]
+    return calendar.monthrange(year, month)[1]
 
 # =============================================================================
 # smbc functions
@@ -232,7 +232,7 @@ def set_period_to_download_csv(driver, year, month):
 
     to_year_num = year
     to_month_num = month
-    to_date_num = 28  # TODO: get date
+    to_date_num = get_last_date(year, month)
 
     # set "from"
     from_year = driver.find_element_by_name('FromYear')
