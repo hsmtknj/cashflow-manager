@@ -96,16 +96,26 @@ def make_dir_to_save_bank_statement(user, bank, period):
                           + '/' + str(target_month))
         if (not os.path.isdir(year_dir_path)):
             os.makedirs(year_dir_path)
-            print('make directory: ' + year_dir_path)
+            print('make   directory: ' + year_dir_path)
+        else:
+            print('exists directory: ' + year_dir_path)
 
         if (not os.path.isdir(month_dir_path)):
             os.makedirs(month_dir_path)
-            print('make directory:' + month_dir_path)
+            print('make directory:   ' + month_dir_path)
+        else:
+            print('exists directory: ' + month_dir_path)
 
         # move to last month
         target_date -= relativedelta(months=1)
 
 
+# TODO: implement
+def delete_dir_to_save_bank_statement():
+    pass
+
+# NOTE: If you want to handle with new bank or revise each bank functions,
+#       You shoule revise this function.
 def download_user_bank_statement(user, bank, period):
     """
     download user's bank statement for bank
@@ -121,6 +131,17 @@ def download_user_bank_statement(user, bank, period):
     if (bank == 'smbc'):
         download_user_bank_statement_smbc(user, bank, period)
 
+# NOTE: If you want to handle with new bank or revise each bank functions,
+#       You shoule revise this function.
+def exists_bank_statement(user, bank):
+    """
+    chech if bank statement exists or not
+    
+    :param  user: str, user name
+    :param  bank: str, bank name
+    :return     : bool, existence of bank statement
+    """
+    pass
 
 def get_last_date(year, month):
     """
@@ -131,6 +152,28 @@ def get_last_date(year, month):
     :return None :
     """
     return calendar.monthrange(year, month)[1]
+
+
+def make_master_data():
+    """
+    make master data from each bank statement
+
+    :param  hoge:
+    :return None:
+    """
+    # get all user data
+    user_filepath = DATA_ROOT_DIR_PATH + 'registration/user_list.csv'
+    user_list = list(pd.read_csv(user_filepath, header=None).values)[0]
+
+    # get all bank data
+    bank_filepath = DATA_ROOT_DIR_PATH + 'registration/bank_list.csv'
+    bank_list = list(pd.read_csv(bank_filepath, header=None).values)[0]
+
+    # loop for user and bank
+    for user in user_list:
+        for bank in bank_list:
+            print(user + ", " + bank)
+
 
 # =============================================================================
 # smbc functions
@@ -160,15 +203,17 @@ def download_user_bank_statement_smbc(user, bank, period):
         set_period_to_download_csv(driver, year, month)
 
         # download csv file of bank statement
+        filename = 'bank_statement_raw.csv'
         filepath_to_save_csv = (DATA_ROOT_DIR_PATH
                                 + 'bank_statement/' + bank + '/user_' + user + '/'
                                 + str(year) + '/' 
-                                + str(month)) + '/'
-        if (not os.path.isfile(filepath_to_save_csv + 'meisai.csv')):
+                                + str(month) + '/'
+                                + filename)
+        if (not os.path.isfile(filepath_to_save_csv)):
             download_csv_simple_smbc(driver, filepath_to_save_csv)
-            print('download: ' + filepath_to_save_csv + 'meisai.csv')
+            print('download: ' + filepath_to_save_csv)
         else:
-            print('exist   : ' + filepath_to_save_csv + 'meisai.csv')
+            print('exist   : ' + filepath_to_save_csv)
 
         # move to last month
         target_date -= relativedelta(months=1)
@@ -291,14 +336,21 @@ def download_csv_simple_smbc(driver, filepath_to_save_csv):
     time.sleep(WAIT_TIME_LONG)
 
     # move csv file
-    filepath_download_dir = os.environ['HOME'] + '/Downloads/meisai.csv'
-    dest_path = shutil.move(filepath_download_dir, filepath_to_save_csv)
+    filepath_download_file = os.environ['HOME'] + '/Downloads/meisai.csv'
+    dest_path = shutil.move(filepath_download_file, filepath_to_save_csv)
 
 
 if __name__ == '__main__':
-    # (1) make directories
-    # make_dir_to_save_bank_statement('hoge', 'hoge', 24)
+    # [unit: download bank statement]
+    # (1) make directories to save bank statement
+    # make_dir_to_save_bank_statement('user_name', 'bank_name', period)
+    # (2) download csv data
+    # download_user_bank_statement('user_name', 'bank_name', period)
 
-    # (2) download bank statement
+    # [integration]
+    # (1) download bank statement
     download_all_bank_statement(2)
     
+    # TODO:
+    # (2) create master data
+    # make_master_data()
