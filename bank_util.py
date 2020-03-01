@@ -32,7 +32,7 @@ def download_all_bank_statement(period):
     """
     download all bank statement (of all user and all bank) in specified period
 
-    :param  period: int, period that we want to get bank statement data (past ~ now)
+    :param  period: int, period that we want to get bank statement data (month, past ~ now)
     :return None
     """
     # get all user data
@@ -75,7 +75,7 @@ def make_dir_to_save_bank_statement(user, bank, period):
 
     :param  user  : str, user name
     :param  bank  : str, user name
-    :param  period: int, period that we want to get bank statement data (past ~ now)
+    :param  period: int, period that we want to get bank statement data (month, past ~ now)
     :return None
     """
     # get last month date
@@ -125,7 +125,7 @@ def download_user_bank_statement(user, bank, period):
 
     :param  user  : str, user name
     :param  bank  : str, bank name
-    :param  period: int, period that we want to get bank statement data (past ~ now)
+    :param  period: int, period that we want to get bank statement data (month, past ~ now)
     :return None
     """
     # smbc: download user bank statement
@@ -168,7 +168,7 @@ def make_master_data(period):
     """
     make master data from each bank statement
 
-    :param  period: int, period that we want to make master data (past ~ now)
+    :param  period: int, period that we want to make master data (month, past ~ now)
     :return None
     """
     # make directories to save master data
@@ -186,17 +186,17 @@ def make_master_data(period):
     # merge to master data: loop for user and bank
     for user in user_list:
         for bank in bank_list:
-            # check if bank statement exists or not
-            pass
+            # check if user data exists in the bank
+            if (exists_bank_account(user, bank)):
+                convert_all_bank_statement_data_for_master_data_creating(period, user, bank)
 
 
-            
 def make_dir_to_save_master_data(period):
     """
     make directories to save master data
     master data is created every other years
 
-    :param  period: int, period that we want to make master data (past ~ now)
+    :param  period: int, period that we want to make master data (month, past ~ now)
     :return None
     """
     # get last month date
@@ -213,6 +213,47 @@ def make_dir_to_save_master_data(period):
             print('make   directory: ' + year_dir_path)
         else:
             print('exists directory: ' + year_dir_path)
+
+# TODO: implement
+def convert_all_bank_statement_data_for_master_data_creating(period, user, bank):
+    """
+    convert bank_statement_raw.csv to an application data format to merge
+
+    :param  period: int, period that we want to make master data (month, past ~ now)
+    :param  user  : str, user name
+    :param  bank  : str, bank name
+    :return None
+    """
+    target_date = datetime.datetime.today() - relativedelta(months=1)
+    for i in range(period):
+        # set year and month
+        year = target_date.year
+        month = target_date.month
+
+        # convert bank statement data to an application format
+        filename_raw = 'bank_statement_raw.csv'
+        filepath_raw = (DATA_ROOT_DIR_PATH
+                        + 'bank_statement/' + bank + '/user_' + user + '/'
+                        + str(year) + '/' 
+                        + str(month) + '/'
+                        + filename_raw)
+
+        if (os.path.isfile(filepath_raw)):
+            # TODO: implement
+            # convert data
+            print('convert  : ' + filepath_raw)
+        else:
+            print('not find : ' + filepath_raw)
+
+        # move to last month
+        target_date -= relativedelta(months=1)    
+
+# TODO: implement
+def convert_bank_statement_data_to_application_format(filepath_raw):
+    """
+
+    """
+    pass
 
 
 # =============================================================================
