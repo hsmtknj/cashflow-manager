@@ -21,6 +21,7 @@ parent2_path = parent_path(current_path, f=1)
 WAIT_TIME_LONG = 5
 WAIT_TIME_SHORT = 2
 DATA_ROOT_DIR_PATH = parent2_path + '/cashflow_mng_root_dir/'
+BANK_NAME_SMBC = 'smbc'
 
 
 # =============================================================================
@@ -128,7 +129,7 @@ def download_user_bank_statement(user, bank, period):
     :return None
     """
     # smbc: download user bank statement
-    if (bank == 'smbc'):
+    if (bank == BANK_NAME_SMBC):
         download_user_bank_statement_smbc(user, bank, period)
 
 # NOTE: If you want to handle with new bank or revise each bank functions,
@@ -153,14 +154,18 @@ def get_last_date(year, month):
     """
     return calendar.monthrange(year, month)[1]
 
-
-def make_master_data():
+# TODO: implement
+def make_master_data(period):
     """
     make master data from each bank statement
 
-    :param  hoge:
-    :return None:
+    :param  period: int, period that we want to make master data (past ~ now)
+    :return None
     """
+    # TODO:
+    # make directories to save master data
+    make_dir_to_save_master_data(period)
+
     # get all user data
     user_filepath = DATA_ROOT_DIR_PATH + 'registration/user_list.csv'
     user_list = list(pd.read_csv(user_filepath, header=None).values)[0]
@@ -169,10 +174,35 @@ def make_master_data():
     bank_filepath = DATA_ROOT_DIR_PATH + 'registration/bank_list.csv'
     bank_list = list(pd.read_csv(bank_filepath, header=None).values)[0]
 
+    # TODO:
     # loop for user and bank
     for user in user_list:
         for bank in bank_list:
-            print(user + ", " + bank)
+            pass
+
+
+def make_dir_to_save_master_data(period):
+    """
+    make directories to save master data
+    master data is created every other years
+
+    :param  period: int, period that we want to make master data (past ~ now)
+    :return None
+    """
+    # get last month date
+    period_past_date = datetime.datetime.today() - relativedelta(months=period)
+    from_year = period_past_date.year
+    last_month_date = datetime.datetime.today() - relativedelta(months=1)
+    to_year = last_month_date.year
+
+    for year in range(from_year, to_year+1):
+        year_dir_path = (DATA_ROOT_DIR_PATH
+                        + 'master_data/' + str(year) + '/')
+        if (not os.path.isdir(year_dir_path)):
+            os.makedirs(year_dir_path)
+            print('make   directory: ' + year_dir_path)
+        else:
+            print('exists directory: ' + year_dir_path)
 
 
 # =============================================================================
@@ -349,8 +379,8 @@ if __name__ == '__main__':
 
     # [integration]
     # (1) download bank statement
-    download_all_bank_statement(2)
+    # download_all_bank_statement(24)
     
     # TODO:
     # (2) create master data
-    # make_master_data()
+    make_master_data(24)
