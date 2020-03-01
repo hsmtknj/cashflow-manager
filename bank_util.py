@@ -132,17 +132,26 @@ def download_user_bank_statement(user, bank, period):
     if (bank == BANK_NAME_SMBC):
         download_user_bank_statement_smbc(user, bank, period)
 
-# NOTE: If you want to handle with new bank or revise each bank functions,
-#       You shoule revise this function.
-def exists_bank_statement(user, bank):
+# NOTE: name csv file of bank statement "bank_statement_raw.csv" independent of bank
+def exists_bank_statement(user, bank, year, month):
     """
     chech if bank statement exists or not
     
-    :param  user: str, user name
-    :param  bank: str, bank name
-    :return     : bool, existence of bank statement
+    :param  user : str, user name
+    :param  bank : str, bank name
+    :param  year : int, year that we want to check existence
+    :param  month: int, month that we want to check existence
+    :return      : bool, existence of bank statement
     """
-    pass
+    path = (DATA_ROOT_DIR_PATH
+            + 'bank_statement/'
+            + bank
+            + '/user_' + user + '/'
+            + str(year) + '/'
+            + str(month) + '/'
+            + 'bank_statement_raw.csv')
+    return os.path.exists(path)
+
 
 def get_last_date(year, month):
     """
@@ -162,7 +171,6 @@ def make_master_data(period):
     :param  period: int, period that we want to make master data (past ~ now)
     :return None
     """
-    # TODO:
     # make directories to save master data
     make_dir_to_save_master_data(period)
 
@@ -175,12 +183,14 @@ def make_master_data(period):
     bank_list = list(pd.read_csv(bank_filepath, header=None).values)[0]
 
     # TODO:
-    # loop for user and bank
+    # merge to master data: loop for user and bank
     for user in user_list:
         for bank in bank_list:
+            # check if bank statement exists or not
             pass
 
 
+            
 def make_dir_to_save_master_data(period):
     """
     make directories to save master data
@@ -383,4 +393,4 @@ if __name__ == '__main__':
     
     # TODO:
     # (2) create master data
-    make_master_data(24)
+    make_master_data(2)
