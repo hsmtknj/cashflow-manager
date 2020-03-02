@@ -188,6 +188,7 @@ def make_master_data(period):
         for bank in bank_list:
             # check if user data exists in the bank
             if (exists_bank_account(user, bank)):
+                # convert data to an application format
                 convert_all_bank_statement_data_for_master_data_creating(period, user, bank)
 
 
@@ -232,15 +233,17 @@ def convert_all_bank_statement_data_for_master_data_creating(period, user, bank)
 
         # convert bank statement data to an application format
         filename_raw = 'bank_statement_raw.csv'
-        filepath_raw = (DATA_ROOT_DIR_PATH
-                        + 'bank_statement/' + bank + '/user_' + user + '/'
-                        + str(year) + '/' 
-                        + str(month) + '/'
-                        + filename_raw)
+        filepath_head = (DATA_ROOT_DIR_PATH
+                         + 'bank_statement/' + bank + '/user_' + user + '/'
+                         + str(year) + '/' 
+                         + str(month) + '/')
+        filepath_raw = filepath_head + filename_raw
+        filepath_out = filepath_head + 'bank_statement.csv'
 
         if (os.path.isfile(filepath_raw)):
             # TODO: implement
             # convert data
+            convert_bank_statement_to_app_format(filepath_raw, filepath_out, user, bank)
             print('convert  : ' + filepath_raw)
         else:
             print('not find : ' + filepath_raw)
@@ -248,13 +251,26 @@ def convert_all_bank_statement_data_for_master_data_creating(period, user, bank)
         # move to last month
         target_date -= relativedelta(months=1)    
 
-# TODO: implement
-def convert_bank_statement_data_to_application_format(filepath_raw):
+# NOTE: If you want to handle with new bank or revise each bank functions,
+#       You shoule revise this function.
+def convert_bank_statement_to_app_format(filepath_raw, filepath_out, user, bank):
     """
+    convert raw bank statement to an application format
 
+    :param  filepath_raw: str, filepath to raw bank statement data
+    :param  filepath_out: str, filepath to output bank statement data for an application
+    :param  user        : str, user name
+    :param  bank        : str, bank name
+    :return None
+    """
+    if (bank == BANK_NAME_SMBC):
+        convert_bank_statement_to_app_format_smbc(filepath_raw, filepath_out, user, bank)
+
+# TODO:
+def conv_date():
+    """
     """
     pass
-
 
 # =============================================================================
 # smbc functions
@@ -421,6 +437,36 @@ def download_csv_simple_smbc(driver, filepath_to_save_csv):
     dest_path = shutil.move(filepath_download_file, filepath_to_save_csv)
 
 
+def convert_bank_statement_to_app_format_smbc(filepath_raw, filepath_out, user, bank):
+    """
+    convert raw bank statement (smbc) to an application format
+
+    :param  filepath_raw: str, filepath to raw bank statement data
+    :param  filepath_out: str, filepath to output bank statement data for an application
+    :param  user        : str, user name
+    :param  bank        : str, bank name
+    :return None
+    """
+    # convert and add columns name
+    df = pd.read_csv(filepath_raw, encoding='shift-jis')
+    df = df.rename(columns={'年月日（和暦）': 'date'})
+    df = df.rename(columns={'お引出し': 'withdrawal'})
+    df = df.rename(columns={'お預入れ': 'deposit'})
+    df = df.rename(columns={'お取り扱い内容': 'description1'})
+    df = df.rename(columns={'残高': 'balance'})
+    df['user_name'] = 'user_' + user
+    df['bank_name'] = bank
+    df['description2'] = ''
+    df['id'] = ''
+    df = df[['user_name', 'bank_name', 'id', 'date', 'withdrawal', 'deposit', 'description1', 'description2', 'balance']]
+
+    # TODO:
+    # convert date format
+
+    print(df)
+
+
+
 if __name__ == '__main__':
     # [unit: download bank statement]
     # (1) make directories to save bank statement
@@ -434,4 +480,4 @@ if __name__ == '__main__':
     
     # TODO:
     # (2) create master data
-    make_master_data(2)
+    make_master_data(1)
